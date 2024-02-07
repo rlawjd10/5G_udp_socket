@@ -1,3 +1,4 @@
+# 생각 정리
 import socket
 import subprocess
 
