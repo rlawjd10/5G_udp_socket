@@ -11,7 +11,9 @@ def ip_tshark():
         process = subprocess.Popen("tshark -i 2 -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, text=True)
         # 자식 프로세스의 출력을 읽어오고 종료할 때까지 기다림.
         output, _ = process.communicate()
-        ip_src_list = [line.strip().split(",")[1] for line in output.strip().split("\n") if line.strip()]
+        # 공백 제거하고 , 기준으로 문자열 분할
+        ip_src_list = [line.strip().split(",")[1]]
+        # 중복을 제거하고 필터링한 ip를 main으로 return하기
         return list(set(ip_src_list))
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
