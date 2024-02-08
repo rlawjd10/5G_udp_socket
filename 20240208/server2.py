@@ -7,16 +7,17 @@ port = 3030
 
 def ip_tshark():
     try:
-        process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
         #process = subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", shell=True, check=True)
         
         # 자식 프로세스 출력 읽어오고 종료할 때까지 기다림
         # process.wait()
         # 자식 프로세스의 출력을 읽어오고 종료할 때까지 기다림.
-        output, _ = process.communicate()
+        #output, _ = process.communicate()
         # 공백 제거하고 , 기준으로 문자열 분할, 각 줄에 대한 반복
         #ip_src_list = [line.strip().split(",")[1]]
-        ip_src_list = [line.strip().split(",")[1] for line in output.decode('utf-8').strip().split("\n") if line.strip()]
+        #ip_src_list = [line.strip().split(",")[1] for line in process.decode('utf-8').strip().split("\n") if line.strip()]
+        ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
         
         ip_list = list(set(ip_src_list))
         
@@ -52,3 +53,9 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
+            
+            
+            
+            
+ ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
+AttributeError: 'Popen' object has no attribute 'strip'. Did you mean: 'stdin'?
