@@ -1,28 +1,32 @@
 # 원하는 조건의 ip를 print 할 수 있도록
 import socket
 import subprocess
+import os
 
 host = '192.168.0.13'
 port = 3030
 
 def ip_tshark():
     try:
-        process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+        #process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True).stdout
         #process = subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", shell=True, check=True)
         
+        # 1개 패킷 캡쳐만 하면 됨. 어차피 success되면 해당 ip만 필요하니까. 추후 delete 문제는 나중에
+        # os.popen 시도해보고 안되면 subprocess.run().stdout으로 시도해볼 것. 생각해보니까 1개만 담는거면 ㄱㅊ 할 듯
+        result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -c 1").read()
+        
+
         # 자식 프로세스 출력 읽어오고 종료할 때까지 기다림
         # process.wait()
         # 자식 프로세스의 출력을 읽어오고 종료할 때까지 기다림.
         #output, _ = process.communicate()
         # 공백 제거하고 , 기준으로 문자열 분할, 각 줄에 대한 반복
-        #ip_src_list = [line.strip().split(",")[1]]
-        #ip_src_list = [line.strip().split(",")[1] for line in process.decode('utf-8').strip().split("\n") if line.strip()]
-        ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
+        #ip_src_list = [line.strip().split(",")[1] for line in output.decode('utf-8').strip().split("\n") if line.strip()]
         
-        ip_list = list(set(ip_src_list))
+        #ip_list = list(set(ip_src_list))
         
-        for ip_src in ip_list:
-        	print(ip_src)
+        #for ip_src in ip_list:
+        	#print(ip_src)
         
         # 중복을 제거하고 필터링한 ip를 main으로 return하기
         return print("success")
@@ -53,10 +57,3 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
-            
-            
-            
-'''         
-ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
-AttributeError: 'Popen' object has no attribute 'strip'. Did you mean: 'stdin'?
-'''
