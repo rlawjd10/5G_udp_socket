@@ -13,7 +13,7 @@ port = 3030
 #subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s 12.1.0.0/16 -j DROP'", shell=True, check=True)
 
 
-# tshark 실행
+# TSHARK
 def ip_tshark():
     try:
         # os - 콘솔에 출력하지 않고 수행만 & 결과값을 result 변수에 저장 & 1개 출력하면 수행 끝(output point)
@@ -23,11 +23,14 @@ def ip_tshark():
         #result = subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:1'", stdout=subprocess.PIPE, text=true)
         #result = subprocess.check_output("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:1'")
         
-
-        #checking
+        #checking (나중에 지울것)
         print(result.split(",")[-1])
-        
 
+        ip_addr = []
+        ip_addr = list(set(result.split(",")[-1]))
+
+        print(f"ip_addr = {ip_addr}")
+        
 
         return print("tshark success")
         
@@ -46,9 +49,12 @@ def handler(signum, frame):
     #강제 종료
     sys.exit(0)
 
-# SIGINT handler, rule 삭제
+
+# SIGINT
 signal.signal(signal.SIGINT, handler)
 
+
+# UDP_SOCKET PROGRAMMING
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((host, port))
 
@@ -62,8 +68,6 @@ while True:
 
     if data.strip() == 'success':
         try:
-            #2. tshark에서 출력되는 data를 어떻게 바로 array에 넣을 수 있을까. list(set())으로 하면 중복되지 않음
-            #6. tshark로 타임스탬프 찍어서 계속 시간을 갱신하는 방법은 어떨까 - 갱신된 시간보다 작으면 delete
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
