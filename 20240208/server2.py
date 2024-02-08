@@ -7,11 +7,11 @@ port = 3030
 
 def ip_tshark():
     try:
-        process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+        process = subprocess.Popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         #process = subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", shell=True, check=True)
         
         # 자식 프로세스 출력 읽어오고 종료할 때까지 기다림
-        process.wait()
+        # process.wait()
         # 자식 프로세스의 출력을 읽어오고 종료할 때까지 기다림.
         output, _ = process.communicate()
         # 공백 제거하고 , 기준으로 문자열 분할, 각 줄에 대한 반복
@@ -52,18 +52,3 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
-
-
-'''
-Traceback (most recent call last):
-  File "/home/etri/server2.py", line 52, in <module>
-    ip_tshark()
-  File "/home/etri/server2.py", line 14, in ip_tshark
-    process.wait()
-  File "/usr/lib/python3.10/subprocess.py", line 1209, in wait
-    return self._wait(timeout=timeout)
-  File "/usr/lib/python3.10/subprocess.py", line 1959, in _wait
-    (pid, sts) = self._try_wait(0)
-  File "/usr/lib/python3.10/subprocess.py", line 1917, in _try_wait
-    (pid, sts) = os.waitpid(self.pid, wait_flags)
-'''
