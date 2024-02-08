@@ -15,6 +15,7 @@ def ip_tshark():
         # os.popen 시도해보고 안되면 subprocess.run().stdout으로 시도해볼 것. 생각해보니까 1개만 담는거면 ㄱㅊ 할 듯
         result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -c 1").read()
         
+        print(result.split(",")[1])
 
         # 자식 프로세스 출력 읽어오고 종료할 때까지 기다림
         # process.wait()
@@ -29,7 +30,7 @@ def ip_tshark():
         	#print(ip_src)
         
         # 중복을 제거하고 필터링한 ip를 main으로 return하기
-        return print("success")
+        return print("tshark success")
         
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
