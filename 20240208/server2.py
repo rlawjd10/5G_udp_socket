@@ -56,6 +56,7 @@ while True:
             
             
             
-            
- ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
+'''         
+ip_src_list = [line.strip().split(",")[1] for line in process.strip().split("\n") if line.strip()]
 AttributeError: 'Popen' object has no attribute 'strip'. Did you mean: 'stdin'?
+'''
