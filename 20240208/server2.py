@@ -1,5 +1,3 @@
-# 원하는 조건의 ip를 print 할 수 있도록
-import socket
 import subprocess
 import os
 
@@ -13,9 +11,9 @@ def ip_tshark():
         
         # 1개 패킷 캡쳐만 하면 됨. 어차피 success되면 해당 ip만 필요하니까. 추후 delete 문제는 나중에
         # os.popen 시도해보고 안되면 subprocess.run().stdout으로 시도해볼 것. 생각해보니까 1개만 담는거면 ㄱㅊ 할 듯
-        result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -c 1").read()
+        result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:1'").read()
         
-        print(result.split(",")[1])
+        print(result.split(",")[-1])
 
         # 자식 프로세스 출력 읽어오고 종료할 때까지 기다림
         # process.wait()
@@ -58,3 +56,17 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
+
+
+
+
+'''
+UDP 서버가 192.168.0.13:3030에서 실행 중입니다.
+클라이언트로부터 수신: b'success'
+Running as user "root" and group "root". This could be dangerous.
+Capturing on 'demo-oai'
+7 
+12.1.1.2
+
+tshark success
+'''
