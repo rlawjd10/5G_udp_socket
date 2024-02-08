@@ -14,8 +14,9 @@ def ip_tshark():
         process.wait()
         # 자식 프로세스의 출력을 읽어오고 종료할 때까지 기다림.
         output, _ = process.communicate()
-        # 공백 제거하고 , 기준으로 문자열 분할
-        ip_src_list = [line.strip().split(",")[1]]
+        # 공백 제거하고 , 기준으로 문자열 분할, 각 줄에 대한 반복
+        #ip_src_list = [line.strip().split(",")[1]]
+        ip_src_list = [line.strip().split(",")[1] for line in output.decode('utf-8').strip().split("\n") if line.strip()]
         
         ip_list = list(set(ip_src_list))
         
