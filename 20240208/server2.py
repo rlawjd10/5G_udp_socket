@@ -52,3 +52,18 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
+
+
+'''
+Traceback (most recent call last):
+  File "/home/etri/server2.py", line 52, in <module>
+    ip_tshark()
+  File "/home/etri/server2.py", line 14, in ip_tshark
+    process.wait()
+  File "/usr/lib/python3.10/subprocess.py", line 1209, in wait
+    return self._wait(timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1959, in _wait
+    (pid, sts) = self._try_wait(0)
+  File "/usr/lib/python3.10/subprocess.py", line 1917, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+'''
