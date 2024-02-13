@@ -23,7 +23,9 @@ def ip_tshark():
         print(result.split(",")[-1])
 
         ip_addr = result.split(",")[-1]
-        subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s {ip_addr} -j ACCEPT'", shell=True, check=True)
+        command = ["docker", "exec", "-i", "-t", "oai-spgwu", "/bin/bash", "-c", f"iptables -A FORWARD -s {ip_addr} -j ACCEPT"]
+        subprocess.run(command, check=True)
+        #subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s {ip_addr} -j ACCEPT'", shell=True, check=True)
 
         print("success")
         
