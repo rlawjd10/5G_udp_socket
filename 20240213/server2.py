@@ -24,8 +24,12 @@ def ip_tshark():
         ip_addr = result.split(",")[-1]
         subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {ip_addr}'", shell=True, check=True)
         
-        while (subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", shell=True, check=True)):
+        try:
+            while (subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src", shell=True, check=True)).returncode == 0:
+                print("not server active")
+        except subprocess.CalledProcessError:
             print("not server active")
+
 
         # IP를 return하거나 전역변수에 IP 넣고 관리하는게 나을 듯
         return print("tshark success")
@@ -67,3 +71,4 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
+
