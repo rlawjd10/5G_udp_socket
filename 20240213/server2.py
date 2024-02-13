@@ -24,14 +24,15 @@ def ip_tshark():
         ip_addr = result.split(",")[-1]
         subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {ip_addr}'", shell=True, check=True)
         
-        #subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10'", shell=True, check=True)
-        try:
-            result = subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -c 10", shell=True, check=True, capture_output=True, text=True, timeout=10)
-            for packet in result.stdout.split('\n'):
-                if packet.strip():
-                    print("Received packet from:", packet.strip())
-        except subprocess.TimeoutExpired:
-            print("Timeout occurred. Not enough packets received.")
+        packet_count = 0
+        while packet_count < 10:
+            packet_result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:1'").read()
+            if packet_result:
+                packet_count += 1
+            else:
+                break
+                
+        subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {ip_addr}'", shell=True, check=True)
 
         # IP를 return하거나 전역변수에 IP 넣고 관리하는게 나을 듯
         return print("tshark success")
@@ -73,3 +74,4 @@ while True:
             ip_tshark()
         except subprocess.CalledProcessError as e:
             print(f"스크립트 입력 중 에러 발생")
+
