@@ -34,7 +34,23 @@ def ip_tshark():
             break
         
         
+'''
 
+
+# 파일 읽기
+def ip_tshark():
+	result = os.popen("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10' -e json > output.json").read()
+    	#count = 10
+    	for i in range(10):
+        	with open('output.json', 'r') as f:
+            #f.read(result.split(",")[-1])
+            		print(f.split(",")[-1].split('\n'))
+            #f.write('\n')
+        
+       # if i < count - 1 :
+           # break
+        
+'''
 
 
 
