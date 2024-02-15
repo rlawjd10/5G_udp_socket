@@ -52,14 +52,16 @@ def check_and_update_ip_lists():
         ip = line.split(",")[-1].strip()
         file_list.append(ip)
     file_list = list(set(file_list))
+    print(f"check drop file_list : {file_list}")
     for ip in accept_list:
         if ip not in file_list:
+            print(f"drop ip :  {ip}")
             subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {ip}'", shell=True, check=True)
             accept_list.remove(ip)
             ip_list.remove(ip)
                 
-    print(f"check drop ip_list : {ip_list}")
-    print(f"check drop accept_list : {accept_list}")
+    print(f"check after drop ip_list : {ip_list}")
+    print(f"check after drop accept_list : {accept_list}")
 
 # SIGINT HANDLER FUNCTION
 def handler(signum, frame):
@@ -92,3 +94,4 @@ while True:
         ip_lists = run_tshark()
         check_and_update_ip_lists()
         time.sleep(5)
+        
