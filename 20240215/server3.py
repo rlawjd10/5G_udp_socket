@@ -43,17 +43,21 @@ def check_and_update_ip_lists():
         if new_ip not in accept_list:
             subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {new_ip}'", shell=True, check=True)
             accept_list.append(new_ip)
-    
+
     print(f"check accept ip_list :  {ip_list}")
     print(f"check accept accept_list : {accept_list}")
-	
-    for ip in f:
-        file_ip = ip.split(",")[-1].strip()
-        print(file_ip)
-        if file_ip not in accept_list:
-                subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j DROP -s {file_ip}'", shell=True, check=True)
-                accept_list.remove(file_ip)
-                ip_list.remove(file_ip)
+
+    file_list = []
+    for line in f:
+        ip = line.split(",")[-1].strip()
+        file_list.append(ip)
+    file_list = list(set(file_list))
+    for ip in accept_list:
+        if ip not in file_list:
+            subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {ip}'", shell=True, check=True)
+            accept_list.remove(ip)
+            ip_list.remove(ip)
+                
     print(f"check drop ip_list : {ip_list}")
     print(f"check drop accept_list : {accept_list}")
 
