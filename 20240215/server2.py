@@ -14,17 +14,19 @@ subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s
 # ACCEPT 192.168.0.12(TINM)
 subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -s 12.1.0.0/16 -d 192.168.0.12 -j ACCEPT'", shell=True, check=True)
 
-ip_list = []
-
 def run_tshark():
-    subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10' -e json > output.json", shell=True, capture_output=True, text=True)
+    subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:3' -e json > output.json", shell=True, capture_output=True, text=True)
+    
+    ip_list = []
     
     f = open("output.json", "r")
     for line in f:
-        print(line.split(","[-1].split('\n')))
+        print(line.split(",")[-1])
+        ip_list.append(line.split(",")[-1])
+    ip_list = list(set(ip_list))
     f.close()
 
-    return
+    return ip_list
     
 def update_ip_list(ip_list, new_ip):
     if new_ip not in ip_list:
@@ -68,7 +70,14 @@ while True:
     print(f"클라이언트로부터 수신: {data}")
 
     while(True):
-        run_tshark()
-        print("end_")
+        ip_lists = run_tshark()
+        print(ip_lists)
         #check_and_update_ip_lists()
         time.sleep(5)
+
+
+'''
+
+['12.1.1.2\t\n']
+
+'''
