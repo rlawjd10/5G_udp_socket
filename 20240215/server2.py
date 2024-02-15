@@ -17,9 +17,14 @@ subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 
 ip_list = []
 
 def run_tshark():
-    command = "tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10' -e json"
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    return result
+    subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10' -e json > output.json", shell=True, capture_output=True, text=True)
+    
+    f = open("output.json", "r")
+    for line in f:
+        print(line.split(","[-1].split('\n')))
+    f.close()
+
+    return
     
 def update_ip_list(ip_list, new_ip):
     if new_ip not in ip_list:
@@ -37,7 +42,7 @@ def check_and_update_ip_lists(tshark_output):
 
 # SIGINT HANDLER FUNCTION
 def handler(signum, frame):
-    print("PRESS CTRL + C")
+    print("\nPRESS CTRL + C")
     
     # iptables reset
     subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -F'", shell=True, check=True)
@@ -63,13 +68,7 @@ while True:
     print(f"클라이언트로부터 수신: {data}")
 
     while(True):
-        tshark_output = run_tshark()
-        check_and_update_ip_lists(tshark_output)
+        run_tshark()
+        print("end_")
+        #check_and_update_ip_lists()
         time.sleep(5)
-        
-        
-
-'''
-    raise TypeError(f'the JSON object must be str, bytes or bytearray, '
-TypeError: the JSON object must be str, bytes or bytearray, not CompletedProcess
-'''
