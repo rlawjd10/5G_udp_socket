@@ -4,6 +4,7 @@ import os
 import signal
 import time
 import sys
+import json
 
 host = '192.168.0.13'
 port = 3030
@@ -18,8 +19,8 @@ ip_list = []
 def run_tshark():
     command = "tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:10' -e json"
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    return result.stdout
-
+    return result
+    
 def update_ip_list(ip_list, new_ip):
     if new_ip not in ip_list:
         ip_list.append(new_ip)
@@ -65,9 +66,10 @@ while True:
         tshark_output = run_tshark()
         check_and_update_ip_lists(tshark_output)
         time.sleep(5)
-
-
+        
+        
 
 '''
-NameError: name 'json' is not defined
+    raise TypeError(f'the JSON object must be str, bytes or bytearray, '
+TypeError: the JSON object must be str, bytes or bytearray, not CompletedProcess
 '''
