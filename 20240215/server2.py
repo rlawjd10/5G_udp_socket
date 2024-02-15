@@ -22,7 +22,8 @@ def run_tshark():
     f = open("output.json", "r")
     for line in f:
         print(line.split(",")[-1])
-        ip_list.append(line.split(",")[-1])
+        ip = line.split(",")[-1].strip()
+        ip_list.append(ip)
     ip_list = list(set(ip_list))
     f.close()
 
