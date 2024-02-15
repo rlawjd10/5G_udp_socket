@@ -1,10 +1,8 @@
 import socket
 import subprocess
-import os
 import signal
 import time
 import sys
-import json
 
 host = '192.168.0.13'
 port = 3030
@@ -15,6 +13,7 @@ subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s
 subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -s 12.1.0.0/16 -d 192.168.0.12 -j ACCEPT'", shell=True, check=True)
 
 ip_list = []
+accept_list = []
 
 # RUN TSHARK - output.json
 def run_tshark():
@@ -34,17 +33,22 @@ def run_tshark():
 
 def check_and_update_ip_lists():
     global ip_list
+    global accept_list
 
     f = open("output.json", "r")
 
-    for ip_addr in ip_list:
-        # ip_list에 있는 ip는 accept을 시켜준다
-        subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {ip_addr}'", shell=True, check=True)
+    for new_ip in accept_list:
+        if new_ip not in ip_list:
+            subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {new_ip}'", shell=True, check=True)
+            accept_list.append(new_ip)
 
     for ip in f:
         new_ip = ip.split(",")[-1].strip()
-        if new_ip not in ip_list:
+        if new_ip not in accept_list:
                 subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {new_ip}'", shell=True, check=True)
+                accept_list.remove(new_ip)
+                ip_list.remove(new_ip)
+
 
 # SIGINT HANDLER FUNCTION
 def handler(signum, frame):
