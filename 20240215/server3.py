@@ -28,7 +28,9 @@ def run_tshark():
         ip_list.append(ip)
     ip_list = list(set(ip_list))
     f.close()
-
+    
+    print(f"run_tshark {ip_list}")
+    
     return ip_list
 
 def check_and_update_ip_lists():
@@ -37,18 +39,23 @@ def check_and_update_ip_lists():
 
     f = open("output.json", "r")
 
-    for new_ip in accept_list:
-        if new_ip not in ip_list:
+    for new_ip in ip_list:
+        if new_ip not in accept_list:
             subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j ACCEPT -s {new_ip}'", shell=True, check=True)
             accept_list.append(new_ip)
-
+    
+    print(f"check accept ip_list :  {ip_list}")
+    print(f"check accept accept_list : {accept_list}")
+	
     for ip in f:
-        new_ip = ip.split(",")[-1].strip()
-        if new_ip not in accept_list:
-                subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {new_ip}'", shell=True, check=True)
-                accept_list.remove(new_ip)
-                ip_list.remove(new_ip)
-
+        file_ip = ip.split(",")[-1].strip()
+        print(file_ip)
+        if file_ip not in accept_list:
+                subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -j DROP -s {file_ip}'", shell=True, check=True)
+                accept_list.remove(file_ip)
+                ip_list.remove(file_ip)
+    print(f"check drop ip_list : {ip_list}")
+    print(f"check drop accept_list : {accept_list}")
 
 # SIGINT HANDLER FUNCTION
 def handler(signum, frame):
