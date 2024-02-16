@@ -17,8 +17,10 @@ accept_list = []    # iptables 관리용 ip list
 
 # FILE READ & UPDATE IP_LIST
 def read_file(file_list):
+
     global ip_list
-    
+    subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:3' -e json > output.json", shell=True, capture_output=True, text=True)
+
     # output.json 있는 ip를 중복없이 file_list에 저장
     f = open("output.json", "r")
     for line in f:
@@ -32,9 +34,6 @@ def read_file(file_list):
 def check_and_update_ip_lists():
     global ip_list
     global accept_list
-
-    # 파일에 있는 ip를 ip_list에 저장
-    read_file(ip_list)
 
     # accept_list로 iptables에 accept 된 ip
     for new_ip in ip_list:
@@ -83,7 +82,6 @@ while True:
 
     # 무한 루프 & 3초마다 반복 실행 (tshark)
     while(True):
-        subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:3' -e json > output.json", shell=True, capture_output=True, text=True)
+        read_file(ip_list)
         check_and_update_ip_lists()
         time.sleep(3)   
-        
