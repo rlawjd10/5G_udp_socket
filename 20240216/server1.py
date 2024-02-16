@@ -12,8 +12,8 @@ subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s
 # ACCEPT 192.168.0.12(TINM)
 subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -s 12.1.0.0/16 -d 192.168.0.12 -j ACCEPT'", shell=True, check=True)
 
-ip_list = []    # 한 번이라도 TINM에 접근했던 ip list
-accept_list = []    # iprules table 관리용 ip list
+ip_list = []    # ip list
+accept_list = []    # iptables 관리용 ip list
 
 # FILE READ & UPDATE IP_LIST
 def read_file(file_list):
@@ -27,12 +27,13 @@ def read_file(file_list):
     file_list = list(set(file_list))
     f.close()
 
+
 # INSERT & DELETE IPTABLES RULE
 def check_and_update_ip_lists():
     global ip_list
     global accept_list
 
-    # 파일에 있는 ip를 중복없이 ip_list에 저장
+    # 파일에 있는 ip를 ip_list에 저장
     read_file(ip_list)
 
     # accept_list로 iptables에 accept 된 ip
@@ -51,6 +52,7 @@ def check_and_update_ip_lists():
             print(f"drop ip :  {ip}")
             subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {ip}'", shell=True, check=True)
             accept_list.remove(ip)
+            ip_list.remove(ip)
 
 
 # SIGINT HANDLER FUNCTION
@@ -62,6 +64,7 @@ def handler(signum, frame):
 
     #강제 종료
     sys.exit(0)
+
 
 # SIGINT
 signal.signal(signal.SIGINT, handler)
@@ -83,5 +86,4 @@ while True:
         subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:3' -e json > output.json", shell=True, capture_output=True, text=True)
         check_and_update_ip_lists()
         time.sleep(3)   
-        
         
