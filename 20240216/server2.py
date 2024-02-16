@@ -12,13 +12,11 @@ subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -A FORWARD -s
 # ACCEPT 192.168.0.12(TINM)
 subprocess.run("docker exec -i -t oai-spgwu /bin/bash -c 'iptables -I FORWARD 1 -s 12.1.0.0/16 -d 192.168.0.12 -j ACCEPT'", shell=True, check=True)
 
-ip_list = []    # ip list
 accept_list = []    # iptables 관리용 ip list
 
 # FILE READ & UPDATE IP_LIST
 def read_file(file_list):
-    global ip_list
-    
+ 
     # output.json 있는 ip를 중복없이 parameter에 저장
     f = open("output.json", "r")
     for line in f:
@@ -32,8 +30,8 @@ def read_file(file_list):
 
 # INSERT & DELETE IPTABLES RULE
 def check_and_update_ip_lists():
-    global ip_list
     global accept_list
+    ip_list = []
 
     # tshark ip를 ip_list에 저장
     ip_list = read_file(ip_list)
@@ -45,17 +43,12 @@ def check_and_update_ip_lists():
             accept_list.append(new_ip)
             print(f"accept list = {accept_list}")
 
-    # 현재 파일에 있는 ip list를 확인하기 위한 ip list
-    recent_list = []
-    recent_list = read_file(recent_list)
-
     # accept_list에 있는 ip가 ip_list에 없을 때, delete rule
     for ip in accept_list:
-        if ip not in recent_list:
+        if ip not in ip_list:
             print(f"drop ip :  {ip}")
             subprocess.run(f"docker exec -i -t oai-spgwu /bin/bash -c 'iptables -D FORWARD -j ACCEPT -s {ip}'", shell=True, check=True)
             accept_list.remove(ip)
-            ip_list.remove(ip)
             print(f"accept list (after drop) = {accept_list}")
             
 
@@ -90,4 +83,3 @@ while True:
         subprocess.run("tshark -i demo-oai -Y '(ip.src==12.1.0.0/16)&&(ip.dst==192.168.0.12)&&(frame.len eq 98)' -T fields -e ip.src -a 'duration:3' -e json > output.json", shell=True, capture_output=True, text=True)
         check_and_update_ip_lists()
         time.sleep(1)   
-        
